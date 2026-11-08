@@ -35,13 +35,8 @@
   transition: transform 0.2s ease;
 }
 
-/* Поява лінії при наведенні курсора */
+/* Поява лінії тільки при наведенні курсора */
 .tab:hover::after {
-  transform: scaleX(1);
-}
-
-/* Активна вкладка */
-.activeTab::after {
   transform: scaleX(1);
 }
 
