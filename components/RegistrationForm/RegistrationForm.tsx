@@ -1,105 +1,91 @@
+'use client';
 
-"use client";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
+import { toast } from 'sonner';
 
-import { useState } from "react";
-import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import styles from "./RegistrationForm.module.css";
+import { api } from '@/lib/api/api';
+import { useAuthStore } from '@/lib/store/authStore';
 
-type FormErrors = {
-  name?: string;
-  email?: string;
-  password?: string;
+import styles from './RegistrationForm.module.css';
+
+const validationSchema = Yup.object({
+  name: Yup.string()
+    .trim()
+    .max(32, 'Максимум 32 символи')
+    .required("Введіть ім’я"),
+
+  email: Yup.string()
+    .trim()
+    .email('Введіть коректний email')
+    .max(64, 'Максимум 64 символи')
+    .required('Введіть email'),
+
+  password: Yup.string()
+    .min(8, 'Мінімум 8 символів')
+    .max(128, 'Максимум 128 символів')
+    .required('Введіть пароль'),
+});
+
+type RegisterResponse = {
+  message?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 };
 
 export default function RegistrationForm() {
   const router = useRouter();
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState("");
 
-  function validateForm(): FormErrors {
-    const newErrors: FormErrors = {};
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+    validationSchema,
 
-    if (name.trim().length < 2) {
-      newErrors.name = "Введіть коректне ім’я";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email.trim()) {
-      newErrors.email = "Введіть email";
-    } else if (!emailRegex.test(email.trim())) {
-      newErrors.email = "Введіть коректний email";
-    }
-
-    if (password.length < 8) {
-      newErrors.password = "Мінімум 8 символів";
-    }
-
-    return newErrors;
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setNotification("");
-
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      const data: { message?: string; error?: string } =
-        await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            data.error ||
-            "Не вдалося зареєструватися"
+    onSubmit: async (values) => {
+      try {
+        const response = await api.post<RegisterResponse>(
+          '/auth/register',
+          {
+            name: values.name.trim(),
+            email: values.email.trim().toLowerCase(),
+            password: values.password,
+          }
         );
+
+        setUser(response.data.user);
+
+        toast.success('Реєстрація успішна!');
+
+        router.push('/');
+      } catch (error: unknown) {
+        let message = 'Не вдалося зареєструватися. Спробуйте ще раз.';
+
+        if (axios.isAxiosError(error)) {
+          message =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            message;
+        } else if (error instanceof Error) {
+          message = error.message;
+        }
+
+        toast.error(message);
       }
-
-      setNotification("Реєстрація успішна!");
-
-      router.push("/");
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Сталася помилка. Спробуйте ще раз.";
-
-      setNotification(message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    },
+  });
 
   return (
     <div className={styles.formWrapper}>
@@ -120,7 +106,7 @@ export default function RegistrationForm() {
 
       <form
         className={styles.form}
-        onSubmit={handleSubmit}
+        onSubmit={formik.handleSubmit}
         noValidate
       >
         <div className={styles.fieldGroup}>
@@ -130,20 +116,15 @@ export default function RegistrationForm() {
             id="name"
             type="text"
             placeholder="Ваше ім’я"
-            value={name}
-            disabled={loading}
             autoComplete="name"
-            onChange={(event) => {
-              setName(event.target.value);
-              setErrors({ ...errors, name: undefined });
-              setNotification("");
-            }}
+            disabled={formik.isSubmitting}
             className={styles.input}
+            {...formik.getFieldProps('name')}
           />
 
-          {errors.name && (
+          {formik.touched.name && formik.errors.name && (
             <span className={styles.error}>
-              {errors.name}
+              {formik.errors.name}
             </span>
           )}
         </div>
@@ -155,20 +136,15 @@ export default function RegistrationForm() {
             id="email"
             type="email"
             placeholder="example@email.com"
-            value={email}
-            disabled={loading}
             autoComplete="email"
-            onChange={(event) => {
-              setEmail(event.target.value);
-              setErrors({ ...errors, email: undefined });
-              setNotification("");
-            }}
+            disabled={formik.isSubmitting}
             className={styles.input}
+            {...formik.getFieldProps('email')}
           />
 
-          {errors.email && (
+          {formik.touched.email && formik.errors.email && (
             <span className={styles.error}>
-              {errors.email}
+              {formik.errors.email}
             </span>
           )}
         </div>
@@ -179,20 +155,12 @@ export default function RegistrationForm() {
           <div className={styles.passwordWrapper}>
             <input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="********"
-              value={password}
-              disabled={loading}
               autoComplete="new-password"
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setErrors({
-                  ...errors,
-                  password: undefined,
-                });
-                setNotification("");
-              }}
+              disabled={formik.isSubmitting}
               className={styles.input}
+              {...formik.getFieldProps('password')}
             />
 
             <button
@@ -200,19 +168,17 @@ export default function RegistrationForm() {
               className={styles.passwordToggle}
               onClick={() => setShowPassword(!showPassword)}
               aria-label={
-                showPassword
-                  ? "Сховати пароль"
-                  : "Показати пароль"
+                showPassword ? 'Сховати пароль' : 'Показати пароль'
               }
-              disabled={loading}
+              disabled={formik.isSubmitting}
             >
-              {showPassword ? "Сховати" : "Показати"}
+              {showPassword ? 'Сховати' : 'Показати'}
             </button>
           </div>
 
-          {errors.password && (
+          {formik.touched.password && formik.errors.password && (
             <span className={styles.error}>
-              {errors.password}
+              {formik.errors.password}
             </span>
           )}
         </div>
@@ -220,27 +186,17 @@ export default function RegistrationForm() {
         <button
           type="submit"
           className={styles.submitButton}
-          disabled={loading}
+          disabled={formik.isSubmitting}
         >
-          {loading ? (
+          {formik.isSubmitting ? (
             <span className={styles.loaderWrapper}>
               <span className={styles.loader}></span>
               Реєстрація...
             </span>
           ) : (
-            "Зареєструватися"
+            'Зареєструватися'
           )}
         </button>
-
-        {notification && (
-          <p
-            className={styles.notification}
-            role="alert"
-            aria-live="polite"
-          >
-            {notification}
-          </p>
-        )}
       </form>
     </div>
   );

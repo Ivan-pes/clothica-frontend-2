@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+const backendUrl =
+  process.env.BACKEND_URL || "http://localhost:3000";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -9,6 +12,15 @@ const nextConfig: NextConfig = {
         pathname: "/img/**",
       },
     ],
+  },
+
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
   },
 };
 
