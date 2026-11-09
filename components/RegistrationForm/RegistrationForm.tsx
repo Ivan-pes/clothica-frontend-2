@@ -1,127 +1,143 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
 import { toast } from 'sonner';
-
 import { api } from '@/lib/api/api';
 import { useAuthStore } from '@/lib/store/authStore';
-
 import styles from './RegistrationForm.module.css';
+
+type RegisterResponse = {
+  message: string;
+  user: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+};
+
+const formatPhone = (value: string) => {
+  let digits = value.replace(/\D/g, '');
+
+  if (digits.startsWith('38')) {
+    digits = digits.slice(2);
+  }
+
+  digits = digits.slice(0, 10);
+
+  if (!digits) return '';
+
+  let result = `+38 (${digits.slice(0, 3)}`;
+
+  if (digits.length >= 3) {
+    result += ')';
+  }
+
+  if (digits.length > 3) {
+    result += ` ${digits.slice(3, 6)}`;
+  }
+
+  if (digits.length > 6) {
+    result += `-${digits.slice(6, 8)}`;
+  }
+
+  if (digits.length > 8) {
+    result += `-${digits.slice(8, 10)}`;
+  }
+
+  return result;
+};
 
 const validationSchema = Yup.object({
   name: Yup.string()
     .trim()
+    .matches(
+      /^[\p{Script=Latin}\p{Script=Cyrillic}0-9]+$/u,
+      'Використовуйте лише літери та цифри'
+    )
+    .min(3, 'Мінімум 3 символи')
     .max(32, 'Максимум 32 символи')
-    .required("Введіть ім’я"),
+    .required("Введіть ім'я"),
 
-  email: Yup.string()
-    .trim()
-    .email('Введіть коректний email')
-    .max(64, 'Максимум 64 символи')
-    .required('Введіть email'),
+  phone: Yup.string()
+    .matches(/^\+38\d{10}$/, 'Введіть номер у форматі +380XXXXXXXXX')
+    .required('Введіть номер телефону'),
 
   password: Yup.string()
+    .matches(/^[A-Za-z0-9]+$/, 'Лише латинські літери та цифри')
     .min(8, 'Мінімум 8 символів')
     .max(128, 'Максимум 128 символів')
     .required('Введіть пароль'),
 });
 
-type RegisterResponse = {
-  message?: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-};
-
 export default function RegistrationForm() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
 
-  const [showPassword, setShowPassword] = useState(false);
-
   const formik = useFormik({
     initialValues: {
       name: '',
-      email: '',
+      phone: '',
       password: '',
     },
     validationSchema,
-
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await api.post<RegisterResponse>(
+        const { data } = await api.post<RegisterResponse>(
           '/auth/register',
           {
             name: values.name.trim(),
-            email: values.email.trim().toLowerCase(),
+            phone: values.phone,
             password: values.password,
           }
         );
 
-        setUser(response.data.user);
+        setUser(data.user as Parameters<typeof setUser>[0]);
 
         toast.success('Реєстрація успішна!');
-
         router.push('/');
       } catch (error: unknown) {
-        let message = 'Не вдалося зареєструватися. Спробуйте ще раз.';
-
-        if (axios.isAxiosError(error)) {
-          message =
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            message;
-        } else if (error instanceof Error) {
-          message = error.message;
-        }
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Не вдалося зареєструватися';
 
         toast.error(message);
+      } finally {
+        setSubmitting(false);
       }
     },
   });
 
   return (
     <div className={styles.formWrapper}>
-      <nav className={styles.tabs}>
-        <Link
-          href="/auth/register"
-          className={`${styles.tab} ${styles.activeTab}`}
-        >
+      <div className={styles.tabs}>
+        <div className={`${styles.tab} ${styles.activeTab}`}>
           Реєстрація
-        </Link>
+        </div>
 
         <Link href="/auth/login" className={styles.tab}>
           Вхід
         </Link>
-      </nav>
+      </div>
 
       <h1 className={styles.title}>Реєстрація</h1>
 
-      <form
-        className={styles.form}
-        onSubmit={formik.handleSubmit}
-        noValidate
-      >
+      <form onSubmit={formik.handleSubmit} className={styles.form}>
         <div className={styles.fieldGroup}>
           <label htmlFor="name">Ім’я*</label>
-
           <input
             id="name"
+            name="name"
             type="text"
             placeholder="Ваше ім’я"
-            autoComplete="name"
-            disabled={formik.isSubmitting}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             className={styles.input}
-            {...formik.getFieldProps('name')}
           />
-
           {formik.touched.name && formik.errors.name && (
             <span className={styles.error}>
               {formik.errors.name}
@@ -130,52 +146,46 @@ export default function RegistrationForm() {
         </div>
 
         <div className={styles.fieldGroup}>
-          <label htmlFor="email">Email*</label>
-
+          <label htmlFor="phone">Номер телефону*</label>
           <input
-            id="email"
-            type="email"
-            placeholder="example@email.com"
-            autoComplete="email"
-            disabled={formik.isSubmitting}
-            className={styles.input}
-            {...formik.getFieldProps('email')}
-          />
+            id="phone"
+            name="phone"
+            type="tel"
+            placeholder="+38 (0__) ___-__-__"
+            value={formatPhone(formik.values.phone)}
+            onChange={(event) => {
+              const digits = event.target.value.replace(/\D/g, '');
+              const localDigits = digits.startsWith('38')
+                ? digits.slice(2)
+                : digits;
 
-          {formik.touched.email && formik.errors.email && (
+              formik.setFieldValue(
+                'phone',
+                localDigits ? `+38${localDigits.slice(0, 10)}` : ''
+              );
+            }}
+            onBlur={formik.handleBlur}
+            className={styles.input}
+          />
+          {formik.touched.phone && formik.errors.phone && (
             <span className={styles.error}>
-              {formik.errors.email}
+              {formik.errors.phone}
             </span>
           )}
         </div>
 
         <div className={styles.fieldGroup}>
           <label htmlFor="password">Пароль*</label>
-
-          <div className={styles.passwordWrapper}>
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="********"
-              autoComplete="new-password"
-              disabled={formik.isSubmitting}
-              className={styles.input}
-              {...formik.getFieldProps('password')}
-            />
-
-            <button
-              type="button"
-              className={styles.passwordToggle}
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={
-                showPassword ? 'Сховати пароль' : 'Показати пароль'
-              }
-              disabled={formik.isSubmitting}
-            >
-              {showPassword ? 'Сховати' : 'Показати'}
-            </button>
-          </div>
-
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Пароль"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={styles.input}
+          />
           {formik.touched.password && formik.errors.password && (
             <span className={styles.error}>
               {formik.errors.password}
@@ -188,14 +198,9 @@ export default function RegistrationForm() {
           className={styles.submitButton}
           disabled={formik.isSubmitting}
         >
-          {formik.isSubmitting ? (
-            <span className={styles.loaderWrapper}>
-              <span className={styles.loader}></span>
-              Реєстрація...
-            </span>
-          ) : (
-            'Зареєструватися'
-          )}
+          {formik.isSubmitting
+            ? 'Зачекайте...'
+            : 'Зареєструватися'}
         </button>
       </form>
     </div>
