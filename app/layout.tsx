@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Inter, Nunito_Sans } from 'next/font/google';
+import { Toaster } from 'sonner';
 import 'modern-normalize/modern-normalize.css';
 import './globals.css';
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children, modal }: RootLayoutProps) {
       <body className={`${inter.variable} ${nunitoSans.variable}`}>
         {children}
         {modal}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
