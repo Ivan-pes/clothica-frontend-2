@@ -94,7 +94,7 @@ export default function RegistrationForm() {
           }
         );
 
-        setUser(data.user as Parameters<typeof setUser>[0]);
+        setUser(data.user);
 
         toast.success('Реєстрація успішна!');
         router.push('/');
