@@ -1,37 +1,180 @@
 .header {
-  background-color: var(--color-primary-light);
+  padding: 0;
+  position: relative;
+  z-index: 100;
 }
 
-.content {
+.headerContent {
+  position: relative;
+  z-index: 11;
+
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 24px;
-  padding-top: 16px;
-  padding-bottom: 16px;
 }
 
 .logo {
-  font-family: var(--font-heading);
-  font-size: 20px;
-}
-
-.nav,
-.actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px 24px;
-  font-size: 14px;
+  flex-shrink: 0;
 }
 
-.actions {
-  gap: 8px;
+.navigation {
+  display: none;
 }
 
-.pill {
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-primary);
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth {
+  display: none;
+}
+
+.profileLink {
+}
+
+.loginLink {
+}
+
+.registerLink {
+}
+
+.burgerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.cartBadge {
+}
+
+/* Mobile Menu */
+
+.mobileMenu {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 100px 20px 40px;
+
+  background-color: #d6eac0;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mobileMenuOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.mobileAuth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  margin-top: 40px;
+}
+
+/* 
+   TABLET (768px+)
+*/
+
+@media screen and (min-width: 768px) {
+  .navigation,
+  .auth {
+    display: flex;
+  }
+
+  .burgerButton,
+  .mobileMenu {
+    display: none;
+  }
+}
+
+/*
+   DESKTOP (1440px+)
+ */
+
+@media screen and (min-width: 1440px) {
+  .header {
+  }
+
+  .headerContent {
+  }
+
+  .logo {
+  }
+
+  .navigation {
+  }
+
+  .headerActions {
+  }
+
+  .auth {
+  }
+
+  .profileLink {
+  }
+
+  .loginLink {
+  }
+
+  .registerLink {
+  }
+
+  .burgerButton {
+  }
+
+  .cart {
+  }
+
+  .cartBadge {
+  }
+
+  .mobileMenu {
+  }
+
+  .mobileMenuOpen {
+  }
+
+  .mobileNav {
+  }
+
+  .mobileAuth {
+  }
 }
