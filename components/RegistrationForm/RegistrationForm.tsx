@@ -9,13 +9,15 @@ import { api } from '@/lib/api/api';
 import { useAuthStore } from '@/lib/store/authStore';
 import styles from './RegistrationForm.module.css';
 
+type User = {
+  id: string;
+  name: string;
+  phone: string;
+};
+
 type RegisterResponse = {
   message: string;
-  user: {
-    id: string;
-    name: string;
-    phone: string;
-  };
+  user: User;
 };
 
 const formatPhone = (value: string) => {
