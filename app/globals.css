@@ -89,15 +89,3 @@ h3 {
   }
 }
 
-/* Заглушка компонента: приберіть цей клас, коли почнете верстати компонент */
-.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 140px;
-  padding: 24px;
-  font-weight: 500;
-  border: 1px dashed var(--color-primary);
-  border-radius: var(--radius-card);
-  background-color: var(--color-surface);
-}
