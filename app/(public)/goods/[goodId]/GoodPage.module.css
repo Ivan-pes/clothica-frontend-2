@@ -1,0 +1,19 @@
+.section {
+  width: 100%;
+  min-width: 320px;
+  max-width: 1440px; /* Максимальна ширина всього контейнера на великих екранах */
+  margin: 0 auto;
+  padding: 64px 20px; /* Відступи для мобілки */
+}
+
+@media screen and (min-width: 768px) {
+  .section {
+    padding: 64px 32px; /* Відступи для планшета */
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .section {
+    padding: 112px 64px; /* Відступи для десктопу */
+  }
+}

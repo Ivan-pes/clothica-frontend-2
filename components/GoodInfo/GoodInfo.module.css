@@ -1,3 +1,71 @@
-.goodInfo {
+.card {
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.price {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.details {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+.details:hover {
+  background-color: var(--color-primary-light);
+  cursor: pointer;
 }
