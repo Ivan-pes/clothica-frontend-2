@@ -1,6 +1,5 @@
 import CategoriesFilter from '@/components/CategoriesFilter/CategoriesFilter';
 import GoodsList from '@/components/GoodsList/GoodsList';
-import Pagination from '@/components/Pagination/Pagination';
 
 export default function GoodsPage() {
   return (
@@ -8,7 +7,6 @@ export default function GoodsPage() {
       <h1 className="pageTitle">Всі товари</h1>
       <CategoriesFilter />
       <GoodsList />
-      <Pagination />
     </div>
   );
 }
