@@ -1,3 +1,81 @@
-.goodsOrderList {
+.container {
   width: 100%;
+}
+
+.list {
+}
+
+.item {
+  
+}
+
+.image {
+ 
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 10px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.meta {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.reviews {
+  margin-left: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.quantityInput {
+  width: 50px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.summary {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.summarryValue {
+  font-weight: 700;
+}
+
+.totalRow {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 10px;
 }
