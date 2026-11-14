@@ -228,7 +228,7 @@ export default function Header() {
           onClick={() => closeMenu()}
         >
           <Image
-            src="/icons/clothica-logo.svg"
+            src="/icons/company-logo.svg"
             alt="Clothica"
             width={84}
             height={36}
@@ -280,7 +280,12 @@ export default function Header() {
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
           >
-            {isMenuOpen ? "✕" : "☰"} {/* change this to real svg!!! */}
+            <Image
+              src={isMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"}
+              alt=""
+              width={24}
+              height={24}
+            />
           </button>
 
           {/* Cart */}
@@ -291,7 +296,7 @@ export default function Header() {
             onClick={() => closeMenu()}
           >
             <Image
-              src="/icons/shopping-cart.svg"
+              src="/icons/shopping_cart.svg"
               alt=""
               width={24}
               height={24}
